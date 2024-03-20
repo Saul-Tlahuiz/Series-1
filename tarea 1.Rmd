@@ -1,0 +1,165 @@
+---
+title: "Ejercicios 8 y 9"
+author: "Tlahuiz Tenorio Giovanni Saúl"
+date: "2024-03-20"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+library(readr)
+library(dplyr)
+library(forecast)
+```
+
+## Ejercicio 8
+
+El archivo DutchRetailSales.csv contiene el historico del volumen cuatrimestral de mercado minorista alemán.
+
+1.Estacionar la varianza de la serie.
+
+2.Estacionar la media eliminado la tendencia y las estaciones de la serie.
+
+3.Una vez estacionada la serie ajustar un modelo ARMA apropiado y pronosticar los siguientes 3 cuatrimestres de la serie estacionada.
+
+4.Con el forecast de la serie estacionada revertir las operaciones hasta obtener las predicciones de los proximos tres periodos de la serie original.
+
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+data <- read_csv("DutchRetailSales.csv")
+```
+
+
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+serie <- ts(data)
+plot(serie, main = "Serie original", xlab = "Time", ylab = "Values", col = "firebrick")
+```
+
+
+Primero graficamos la serie original y como bien se observa existe una tendencia positiva a lo largo de la serie, por lo que le haremos distintas transformaciones a la misma con el fin de tener una serie estacionaria sobre la cual podamos ajustar algun modelo.
+
+Para estacionar la varianza de la serie lo que haremos sera aplicar un logaritmo, lo cual es algo que nos ayuda a resolver este problema.
+
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+serie_log <- log(serie)
+plot(serie_log)
+```
+
+
+Ya que estacionamos la varianza de la serie, lo que sigue es estacionar la media para lo cual aplicaremos una diferencia.
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+serie_diff <- diff(serie_log)
+plot(serie_diff, main = "Serie diferenciada", xlab = "Time", ylab = "Values", col = "seagreen")
+```
+
+
+Ya que realizamos estas transformaciones a la serie paso por paso lo que obtenemos es una serie estacionaria sobre la cual ya podremos ajustar algún modelo y hacer nuestro forecasting.
+
+Lo que sigue es el ajuste del modelo y comenzar con el forecasting.
+
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+modelo <- auto.arima(serie[,2])
+summary(modelo)
+```
+
+Ya que obtuvimos que el mejor modelo para la serie es un ARIMA(2,1,2) procederemos a hacer el forecasting de la serie original.
+
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+pronostico <- forecast(modelo,24,level=95)
+
+plot(pronostico, main="Pronóstico",
+ylab="Values")
+```
+
+## Ejercicio 9
+
+El archivo GermanBonds.csv contiene los precios de los bonos de deuda emitidos por el gobierno alemán.
+
+1.Estacionar la varianza de la serie.
+
+2.Estacionar la media eliminado la tendencia.
+
+3.Una vez estacionada la serie ajustar un modelo ARMA apropiado.
+
+4.Realizar 500 escenarios de la trayectoria estacionada a partir del ultimo dato.
+
+5.Revertir las operaciones hasta llevar las 500 simulaciones a las escalas de la serie de tiempo original, luego estime un rango de precio de tal forma que los precios de los bonos caigan dentro del el con una probabilidad del 80%.
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+bonos <- read_csv("GermanBonds.csv")
+```
+
+Al igual que en el ejercicio anterior aplicaremos 2 transformaciones a la serie original para tener una serie estacionaria sobre la cual ajustaremos un modelo apropiado.
+
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+serie_2 <- ts(bonos)
+plot(serie_2, main = "Serie original", xlab = "Time", ylab = "Values", col = "firebrick")
+```
+
+
+La primer grafica es la serie original, en este caso la ponemos con el fin de compararla con la serie una vez que se estacione la media y la varianza.
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+serie_est <- diff(log(serie_2))
+plot(serie_est, main = "Serie transformada", xlab = "Time", ylab = "Values", col = "green4")
+```
+
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+modelo_2 <- auto.arima(serie_2[,2])
+summary(modelo_2)
+```
+Ya que tenemos la serie estacionada le ajustaremos un ARIMA(0,1,1)
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+fit <- arima(serie_2[,2],order=c(0,1,1))
+fit
+```
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+forecast(fit)
+plot(forecast(fit,12),main = "Pronostico", col = "red")
+```
+Ya que tenemos la serie estacionada le ajustaremos un ARIMA(0,1,1)
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+fit <- arima(serie_2[,2],order=c(0,1,1))
+fit
+```
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+forecast(fit)
+plot(forecast(fit,12),main = "Pronostico", col = "red")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
